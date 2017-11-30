@@ -1,0 +1,15 @@
+---
+
+galaxy_info:
+  author: geerlingguy and D2SI
+  description: MySQL server for Debian
+  company: EpiConcept
+  license: BSD, MIT
+  min_ansible_version: 2.0
+  platforms:
+  - name: Debian
+    versions:
+    - all
+  categories:
+    - database
+dependencies: []

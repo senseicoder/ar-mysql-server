@@ -1,0 +1,5 @@
+---
+
+- name: Fact mysql_root_password
+  set_fact:
+    mysql_root_password: "{{ mysql_root_password }}"

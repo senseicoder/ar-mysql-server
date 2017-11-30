@@ -1,0 +1,6 @@
+---
+
+osvar_cfg: /etc/mysql/my.cnf
+osvar_pkg: mysql-server
+osvar_svc: mysql
+osvar_cfg_incdir: /etc/mysql/conf.d

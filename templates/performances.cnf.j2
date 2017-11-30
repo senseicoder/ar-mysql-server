@@ -1,0 +1,45 @@
+[mysqld]
+
+# GENERAL 
+default-storage-engine={{ mysql_engine }}
+
+# MyISAM
+key_buffer_size={{ mysql_myisam_buffer }}M
+myisam-recover-options=FORCE,BACKUP # read-only
+
+# CACHES AND LIMITS
+tmp_table_size=32M
+max_heap_table_size=32M
+query_cache_size=0
+query_cache_type=0
+max-connections=151
+thread-cache-size=50
+open-files-limit=65535 # read-only
+table-definition-cache=4096
+table-open-cache=10240
+
+# INNODB
+innodb_buffer_pool_size={{ mysql_innodb_buffer }}M
+innodb_flush_method=O_DIRECT
+innodb_flush_log_at_trx_commit=2
+innodb_log_files_in_group=2
+innodb-file-per-table=1
+innodb_stats_on_metadata=0
+innodb-log-file-size={{ mysql_innodb_redo_size }}M # read-only, l'echec du redémarrage est normal car MySQL force une purge de fichiers sur le disque
+
+# BINARY LOGGING
+sync_binlog=0
+
+# SAFETY
+max_allowed_packet=33554432
+
+#caches de définition des tables
+table_open_cache=32768
+table_definition_cache=32768
+
+# LOGGING
+log_warnings=2
+log-queries-not-using-indexes=0
+slow-query-log=1
+slow_launch_time=2
+long_query_time=2

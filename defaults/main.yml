@@ -1,0 +1,17 @@
+---
+
+mysql_cfg: "{{ osvar_cfg }}"
+mysql_pkg: "{{ osvar_pkg }}"
+mysql_svc: "{{ osvar_svc }}"
+mysql_cfg_incdir: "{{ osvar_cfg_incdir }}"
+
+mysql_user_home: /root
+mysql_root_username: root
+mysql_root_password: ""
+mysql_root_password_update: no
+mysql_datadir: /space/mysql
+mysql_logdir: /space/logmysql
+mysql_replogdir: /space/logmysql/replog
+mysql_cfg_override: ""
+
+mysql_tmpdir: /space/tmp/mysql

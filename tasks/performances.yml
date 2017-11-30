@@ -1,0 +1,44 @@
+---
+
+- name: cas serveur myisam
+  set_fact:
+    mysql_engine: "myisam"
+    mysql_myisam_buffer: "{{ (mysql_server_memory / 2 - 2048) | int | abs }}"
+    mysql_innodb_buffer: 8
+    mysql_innodb_redo_size: 32
+  when: engine == "myisam"
+
+- name: cas serveur innodb
+  set_fact:
+    mysql_engine: "innodb"
+    mysql_myisam_buffer: 32
+    mysql_innodb_buffer: "{{ (mysql_server_memory - 2048) | int | abs }}"
+    mysql_innodb_redo_size: 256
+  when: engine == "innodb"
+
+- name: cas serveur mixte
+  set_fact:
+    mysql_engine: "innodb"
+    mysql_myisam_buffer: "{{ (mysql_server_memory / 4 - 2048) | int | abs }}"
+    mysql_innodb_buffer: "{{ (mysql_server_memory / 4) | int | abs }}"
+    mysql_innodb_redo_size: 256
+  when: engine == "mixte"
+
+- name: valeur minimale pour mysql_myisam_buffer
+  set_fact:
+    mysql_myisam_buffer: 16
+  when: mysql_myisam_buffer|int <= 0
+
+- name: valeur minimale pour mysql_innodb_buffer
+  set_fact:
+    mysql_innodb_buffer: 128
+  when: mysql_innodb_buffer|int <= 0
+
+- name: vérification des variables calculées
+  fail: >
+    msg="variables mal définies (engine: {{ engine }}, mysql_server_memory: {{ mysql_server_memory }})"
+  when: mysql_engine is undefined
+
+- name: génération de la conf adaptée pour la performance
+  template: src=templates/performances.cnf.j2 dest="{{ mysql_cfg_incdir }}/performances.cnf" owner=mysql group=mysql
+  notify: restart mysql

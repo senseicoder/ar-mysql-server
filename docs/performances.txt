@@ -1,0 +1,32 @@
+#######################################################################################
+# variables en entrée :
+#  type : 1 <=> exclusif voozanoo3 
+#         2 <=> exclusif voozanoo4
+#         3 <=> mixte 
+#  memory : RAM du serveur
+#######################################################################################
+# variables en sortie : 
+#  engine : 
+#     si {{type}} == 1 alors "myisam" 
+#     si {{type}} == 2 alors "innodb" 
+#     si {{type}} == 3 alors "innodb" 
+#  myisam buffer (unité = M) 
+#     si {{type}} == 1 alors ({{memory}}/2) - 2048
+#     si {{type}} == 2 alors 32 
+#     si {{type}} == 3 alors ({{memory}}/4) - 1024 
+#  innodb_buffer (unite = M) 
+#     si {{type}} == 1 alors 8
+#     si {{type}} == 2 alors {{memory}} - 2048 
+#     si {{type}} == 3 alors {{memory}}/4 
+#######################################################################################
+#  innodb_redo_size (unite = M) 
+#     si {{type}} == 1 alors 32
+#     si {{type}} == 2 alors 256 
+#     si {{type}} == 3 alors 256 
+
+# 1. Change innodb_log_file_size in my.cnf
+# 2. Stop MySQL server
+# 3. Ensure MySQL had a clean shutdown (mysql log is your friend)
+# 4. Remove old log files, usually by running the following command: rm -f /var/lib/mysql/ib_logfile*
+# 5. Start MySQL server
+# it should take a bit longer to start because it is going to be creating new transaction log files.
