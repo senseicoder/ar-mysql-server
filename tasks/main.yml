@@ -17,14 +17,14 @@
   when: mysql_installed.stat.exists == false
 
 - name: Ensure MySQL packages are installed
-  apt: name={{ mysql_pkg }} state=installed
+  apt: name={{ mysql_pkg }} state=present
   register: deb_mysql_install_packages
 
 - name: Install Mysql libs for PHP5
-  apt: name=php5-mysql state=installed
+  apt: name=php5-mysql state=present
 
 - name: Ensure Percona TK packages are installed
-  apt: name=percona-toolkit state=installed
+  apt: name=percona-toolkit state=present
 
 - name: Ensure MySQL is stopped after initial install
   service: name=mysql state=stopped
