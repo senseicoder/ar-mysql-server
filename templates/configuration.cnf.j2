@@ -1,9 +1,6 @@
 # {{ ansible_managed }}
 
 [mysqld]
-server-id = {{ mysql_server_id }}
-auto_increment_offset = {{ mysql_auto_increment_offset }}
-binlog-ignore-db = mysql
 bind-address = 0.0.0.0
 tmpdir = {{ mysql_tmpdir }}
 skip-name-resolve

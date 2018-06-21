@@ -12,6 +12,12 @@
     regexp='^key_buffer[ \t]*=[ \t]*(.*)$'
     replace='key_buffer_size = \1'
 
+- name: renommage myisam_recover pour éviter un warning
+  replace: >
+    dest={{ mysql_config_file }}
+    regexp='^myisam_recover[ \t]*=[ \t]*(.*)$'
+    replace='myisam_recover_options = \1'
+
 - name: création dossier temporaire MySQL
   file: path="{{ mysql_tmpdir }}" state=directory owner=mysql group=mysql mode=0755
     
