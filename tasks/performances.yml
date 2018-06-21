@@ -41,4 +41,10 @@
 
 - name: génération de la conf adaptée pour la performance
   template: src=templates/performances.cnf.j2 dest="{{ mysql_cfg_incdir }}/performances.cnf" owner=mysql group=mysql
+  register: out
   notify: restart mysql
+
+- name: Delete innodb log files created by apt package after initial install
+  file: path={{ item }} state=absent
+  with_items : [ "{{ mysql_datadir }}/ib_logfile0", "{{ mysql_datadir }}/ib_logfile1" ]
+  when: out.changed

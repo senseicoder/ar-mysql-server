@@ -11,7 +11,6 @@
     dest={{ mysql_config_file }}
     regexp='^key_buffer[ \t]*=[ \t]*(.*)$'
     replace='key_buffer_size = \1'
-  notify: restart mysql
 
 - name: création dossier temporaire MySQL
   file: path="{{ mysql_tmpdir }}" state=directory owner=mysql group=mysql mode=0755
@@ -25,7 +24,6 @@
     dest={{ mysql_config_file }}
     regexp="^datadir"
     line="datadir = {{ mysql_datadir }}"
-  notify: restart mysql 
   when: mysql_datadir is defined
 
 - name: le datadir par défaut est-il encore présent
@@ -36,12 +34,14 @@
   shell: cp -par /var/lib/mysql/* {{ mysql_datadir }}/
   when: old_datadir.stat.exists == True
 
-- name: reconfiguration apparmor, logrotate pour prendre en compte les nouveaux dossiers Mysql
+- name: reconfiguration apparmor pour prendre en compte les nouveaux dossiers Mysql
   shell: sed -i {{ item }} -e 's#/var/lib/mysql#{{ mysql_datadir }}#g' -e 's#/var/log/mysql#{{ mysql_logdir }}#g'
   register: sedchangeconf
   changed_when: sedchangeconf.stdout != ""
   with_items: 
     - /etc/apparmor.d/usr.sbin.mysqld
+  args:
+    warn: false
 
 - name: logrotate configuration
   template: src=templates/logrotate.j2 dest=/etc/logrotate.d/mysql-server mode=0644 owner=root group=root
@@ -60,7 +60,6 @@
   template: src="{{ templateconf }}"
             dest="{{ mysql_cfg_incdir }}/configuration.cnf"
             owner=0 group=mysql mode=0640
-  notify: restart mysql
 
 - name: création fichier de log pour débloquer lancement mysql
   file: path=/space/logmysql/mysql-error.log state=touch owner=mysql group=mysql
@@ -71,7 +70,7 @@
   with_items : [ mysqld, mysqld_safe ]
   failed_when: false
   changed_when: false
-  when: "{{ mysql_install_packages }} | bool"
+  when: mysql_install_packages
 
 - name: Ensure MySQL is started and not enabled on boot
   service: name={{ mysql_svc }} state=started enabled=no
