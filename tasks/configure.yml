@@ -1,8 +1,4 @@
 ---
-
-- set_fact:
-    mysql_config_file: /etc/mysql/my.cnf
-
 - name: suppression fichier de configuration syslog qui gêne le démarrage
   file: path=/etc/mysql/conf.d/mysqld_safe_syslog.cnf state=absent
 
@@ -37,7 +33,11 @@
   register: old_datadir 
 
 - name: copie des données de /var/lib/mysql vers le nouveau datadir
-  shell: cp -par /var/lib/mysql/* {{ mysql_datadir }}/
+  copy:
+    src: "{{ item }}"
+    dest: "{{mysql_datadir}}/"
+  with_fileglob: 
+    - /var/lib/mysql/*
   when: old_datadir.stat.exists == True
 
 - name: reconfiguration apparmor pour prendre en compte les nouveaux dossiers Mysql
@@ -57,15 +57,14 @@
   with_items: 
     - /var/lib/mysql
     - /var/log/mysql
-
-- name: fichier template configuration
-  set_fact: 
-    templateconf: "configuration.cnf.j2"
   
 - name: Install cnf override into include directory
-  template: src="{{ templateconf }}"
-            dest="{{ mysql_cfg_incdir }}/configuration.cnf"
-            owner=0 group=mysql mode=0640
+  template: 
+    src: configuration.cnf.j2
+    dest: "{{ mysql_cfg_incdir }}/configuration.cnf"
+    owner: 0 
+    group: mysql 
+    mode: 0640
 
 - name: création fichier de log pour débloquer lancement mysql
   file: path=/space/logmysql/mysql-error.log state=touch owner=mysql group=mysql

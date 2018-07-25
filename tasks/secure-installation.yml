@@ -1,9 +1,6 @@
 ---
-
-- set_fact:
-    use_debian: --defaults-file=/etc/mysql/debian.cnf
-
-- meta: flush_handlers
+- name: restart mysql
+  service: name={{ mysql_svc }} state=restarted sleep=5
 
 - name: Disallow root login remotely
   command: 'mysql {{ use_debian }} -NBe "{{ item }}"'
@@ -32,9 +29,11 @@
 
 - name: Copy .my.cnf file with root password credentials
   template:
-    src=user-my.cnf.j2
-    dest={{ item }}
-    owner=0 group=0 mode=0644
+    src: user-my.cnf.j2
+    dest: "{{ item }}"
+    owner: 0 
+    group: 0 
+    mode: 0644
   with_items: 
   - "{{ mysql_user_home }}/.my.cnf"
   - /etc/mysql/conf.d/user.cnf

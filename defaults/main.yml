@@ -5,13 +5,18 @@ mysql_pkg: "{{ osvar_pkg }}"
 mysql_svc: "{{ osvar_svc }}"
 mysql_cfg_incdir: "{{ osvar_cfg_incdir }}"
 
+mysql_cfg_override: ""
+mysql_config_file: "{{ mysql_cfg }}"
+
 mysql_user_home: /root
 mysql_root_username: root
-mysql_root_password: ""
+mysql_root_password: "{{ mysql_server_std[inventory_hostname].mysql_root_password }}"
 mysql_root_password_update: no
-mysql_datadir: /space/mysql
-mysql_logdir: /space/logmysql
-mysql_replogdir: /space/logmysql/replog
-mysql_cfg_override: ""
+mysql_datadir: "{{ mysql_server_std[inventory_hostname].mysql_datadir }}"
+mysql_logdir: "{{ mysql_server_std[inventory_hostname].mysql_logdir }}"
+mysql_replogdir: "{{ mysql_server_std[inventory_hostname].mysql_replogdir }}"
+mysql_tmpdir: "{{ mysql_server_std[inventory_hostname].mysql_tmpdir }}"
+mysql_engine: "{{ mysql_server_std[inventory_hostname].mysql_engine }}"
+mysql_server_memory: "{{ mysql_server_std[inventory_hostname].mysql_server_memory }}"
 
-mysql_tmpdir: /space/tmp/mysql
+use_debian: --defaults-file=/etc/mysql/debian.cnf

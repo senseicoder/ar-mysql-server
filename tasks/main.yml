@@ -1,12 +1,9 @@
 ---
-
 - name: Get OS-specific variables
   include_vars: "{{ item }}"
   with_first_found:
    - "{{ ansible_distribution }}.yml"
    - "{{ ansible_os_family }}.yml"
-
-- include: shared-vars.yml
 
 - name: Check if MySQL is already installed
   stat: path=/etc/init.d/mysql
@@ -40,6 +37,6 @@
   set_fact:
     mysql_install_packages: "{{ (deb_mysql_install_packages is defined and deb_mysql_install_packages.changed) }}"
 
-- include: configure.yml
-- include: secure-installation.yml
-- include: performances.yml
+- include_tasks: configure.yml
+- include_tasks: secure-installation.yml
+- include_tasks: performances.yml
