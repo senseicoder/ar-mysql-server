@@ -1,7 +1,6 @@
 ---
-
 galaxy_info:
-  author: geerlingguy and D2SI
+  author: geerlingguy and D2SI then slgevens
   description: MySQL server for Debian
   company: EpiConcept
   license: BSD, MIT

@@ -1,22 +1,100 @@
 ---
+## mysql standard dirs
+mysql_std_datadir: /var/lib/mysql
+mysql_std_logdir: /var/log/mysql
 
-mysql_cfg: "{{ osvar_cfg }}"
+use_debian: --defaults-file=/etc/mysql/debian.cnf
+
+## mysql global from distrib
 mysql_pkg: "{{ osvar_pkg }}"
 mysql_svc: "{{ osvar_svc }}"
+mysql_config_file: "{{ osvar_cfg }}"
 mysql_cfg_incdir: "{{ osvar_cfg_incdir }}"
-
-mysql_cfg_override: ""
-mysql_config_file: "{{ mysql_cfg }}"
 
 mysql_user_home: /root
 mysql_root_username: root
-mysql_root_password: "{{ mysql_server_std[inventory_hostname].mysql_root_password }}"
+mysql_root_password: root
 mysql_root_password_update: no
-mysql_datadir: "{{ mysql_server_std[inventory_hostname].mysql_datadir }}"
-mysql_logdir: "{{ mysql_server_std[inventory_hostname].mysql_logdir }}"
-mysql_replogdir: "{{ mysql_server_std[inventory_hostname].mysql_replogdir }}"
-mysql_tmpdir: "{{ mysql_server_std[inventory_hostname].mysql_tmpdir }}"
-mysql_engine: "{{ mysql_server_std[inventory_hostname].mysql_engine }}"
-mysql_server_memory: "{{ mysql_server_std[inventory_hostname].mysql_server_memory }}"
+mysql_logdir: /var/log/mysql
+mysql_replogdir: /var/log/mysql/replog
+mysql_server_memory: 2048
 
-use_debian: --defaults-file=/etc/mysql/debian.cnf
+## client
+mysql_client_port: 3306
+mysql_client_socket: 3306
+
+## mysqld_safe
+mysql_mysqld_safe_socket: /var/run/mysqld/mysqld.sock
+mysql_mysqld_safe_nice: 0
+
+## mysqld
+mysql_mysqld_datadir: /var/lib/mysql
+mysql_mysqld_user: mysql
+mysql_mysqld_pid_file: /var/run/mysqld/mysqld.pid
+mysql_mysqld_socket: /var/run/mysqld/mysqld.sock
+mysql_mysqld_port: 3306
+mysql_mysqld_basedir: /usr
+mysql_mysqld_tmpdir: /tmp
+mysql_mysqld_lc_messages_dir: /usr/share/mysql
+mysql_mysqld_skip_external_locking: True
+mysql_mysqld_bind_address: 127.0.0.1
+## key buffer size in MB
+mysql_mysqld_key_buffer_size: 16
+mysql_mysqld_max_allowed_packet: 33554432
+mysql_mysqld_thread_stack: 192K
+mysql_mysqld_myisam_recover: BACKUP
+mysql_mysqld_max_connections: 100
+mysql_mysqld_expire_logs_days: 10
+## in MB
+mysql_mysqld_query_cache_limit: 1
+## in MB
+mysql_mysqld_query_cache_size: 16
+mysql_mysqld_log_error: /var/log/mysql/error.log
+## in MB
+mysql_mysqld_tmp_table_size: 32
+## in MB
+mysql_mysqld_max_heap_table_size: 32
+mysql_mysqld_query_cache_type: 0
+mysql_mysqld_thread_cache_size: 50
+mysql_mysqld_open_files_limit: 65535
+mysql_mysqld_table_definition_cache: 4096
+mysql_mysqld_table_open_cache: 32768
+mysql_mysqld_sync_binlog: 0
+mysql_mysqld_log_warnings: 2
+mysql_mysqld_slow_launch_time: 2
+mysql_mysqld_default_storage_engine: mysiam
+mysql_mysqld_max_binlog_size: 100M
+mysql_mysqld_slow_query_log: 1
+mysql_mysqld_slow_query_log_file: /var/log/mysql/mysql-slow.log
+mysql_mysqld_long_query_time: 2
+# mysql_mysqld_table_cache: 64
+# mysql_mysqld_thread_concurrency: 10
+# mysql_mysqld_general_log_file: /var/log/mysql/mysql-slow.log
+# mysql_mysqld_general_log: 1
+# mysql_mysqld_log_queries_not_using_indexes: False
+# mysql_mysqld_log_slow_admin_statements: 
+# mysql_mysqld_server_id: 1
+# mysql_mysqld_log_bin: /var/log/mysql/mysql-bin.log
+# mysql_mysqld_binlog_do_db: include_database_name
+# mysql_mysqld_binlog_ignore_db: include_database_name
+# mysql_mysqld_chroot: /var/lib/mysql/
+# mysql_mysqld_ssl_ca: /etc/mysql/cacert.pem
+# mysql_mysqld_ssl_cert: /etc/mysql/server-cert.pem
+# mysql_mysqld_ssl_key: /etc/mysql/server-key.pem
+
+## mysqld InnoDB
+mysql_mysqld_innodb_buffer_pool_size: 128
+mysql_mysqld_innodb_flush_method: O_DIRECT
+mysql_mysqld_innodb_flush_log_at_trx_commit: 2
+mysql_mysqld_innodb_log_files_in_group: 2
+mysql_mysqld_innodb_file_per_table: 1
+mysql_mysqld_innodb_stats_on_metadata: 0
+## innodb log file size in MB
+mysql_mysqld_innodb_log_file_size: 48
+
+## mysqldump in MB
+mysql_mysqldump_max_allowed_packet: 16
+
+## MyISAM
+mysql_myisam_key_buffer_size: 16
+mysql_myisam_recover_options: "FORCE,BACKUP"

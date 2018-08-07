@@ -1,7 +1,4 @@
 ---
-- name: restart mysql
-  service: name={{ mysql_svc }} state=restarted sleep=5
-
 - name: Disallow root login remotely
   command: 'mysql {{ use_debian }} -NBe "{{ item }}"'
   with_items:
@@ -31,8 +28,8 @@
   template:
     src: user-my.cnf.j2
     dest: "{{ item }}"
-    owner: 0 
-    group: 0 
+    owner: root 
+    group: root
     mode: 0644
   with_items: 
   - "{{ mysql_user_home }}/.my.cnf"

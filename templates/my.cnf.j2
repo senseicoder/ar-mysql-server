@@ -1,0 +1,77 @@
+# {{ ansible_managed }}
+
+[client]
+port                   = {{ mysql_client_port }}
+socket                 = {{ mysql_client_socket }}
+
+[mysqld_safe]
+socket                 = {{ mysql_mysqld_safe_socket }}
+nice                   = {{ mysql_mysqld_safe_nice }}
+
+[mysqld]
+user                   = {{ mysql_mysqld_user }}
+pid-file               = {{ mysql_mysqld_pid_file }}
+socket                 = {{ mysql_mysqld_socket }}
+port                   = {{ mysql_mysqld_port }}
+basedir                = {{ mysql_mysqld_basedir }}
+datadir                = {{ mysql_mysqld_datadir }}
+tmpdir                 = {{ mysql_mysqld_tmpdir }}
+lc-messages-dir        = {{ mysql_mysqld_lc_messages_dir }}
+{% if mysql_mysqld_skip_external_locking is defined %}skip_external_locking{% else %}#skip_external_locking{% endif %}
+
+{% if mysql_mysqld_skip_name_resolve is defined %}skip-name-resolve{% else %}#skip-name-resolve{% endif %}
+
+bind-address           = {{ mysql_mysqld_bind_address }}
+thread_stack           = {{ mysql_mysqld_thread_stack }}
+thread_cache_size      = {{ mysql_mysqld_thread_cache_size }}
+myisam-recover-options = {{ mysql_mysqld_myisam_recover }}
+{% if mysql_mysqld_max_connections is defined %}max_connections        = {{ mysql_mysqld_max_connections }}{% else %}#max_connections={% endif %}
+
+{% if mysql_mysqld_table_cache is defined %}table_cache            = {{ mysql_mysqld_table_cache }}{% else %}#table_cache={% endif %}
+
+{% if mysql_mysqld_thread_concurrency is defined %}thread_concurrency     = {{ mysql_mysqld_thread_concurrency }}{% else %}#thread_concurrency={% endif %}
+
+query_cache_limit      = {{ mysql_mysqld_query_cache_limit }}M
+{% if mysql_mysqld_general_log is defined %}general_log            = {{ mysql_mysqld_general_log }}{% else %}#general_log={% endif %}
+
+{% if mysql_mysqld_general_log_file is defined %}general_log_file       = {{ mysql_mysqld_general_log_file }}{% else %}#general_log_file={% endif %}
+
+log_error              = {{ mysql_mysqld_log_error }}
+{% if mysql_mysqld_log_queries_not_using_indexes is defined %}log_queries_not_using_indexes{% else %}#log_queries_not_using_indexes{% endif %}
+
+{% if mysql_mysqld_log_slow_admin_statements is defined %}log_slow_admin_statements{% else %}#log_slow_admin_statements{% endif %}
+
+{% if mysql_mysqld_server_id is defined %}server-id              = {{ mysql_mysqld_server_id }}{% else %}#server-id={% endif %}
+
+{% if mysql_mysqld_log_bin is defined %}log_bin                = {{ mysql_mysqld_log_bin }}{% else %}#log_bin={% endif %}
+
+expire_logs_days       = {{ mysql_mysqld_expire_logs_days }}
+max_binlog_size        = {{ mysql_mysqld_max_binlog_size }}
+{% if mysql_mysqld_binlog_do_db is defined %}binlog-do-db           = {{ mysql_mysqld_binlog_do_db }}{% else %}#ssl-key{% endif %}
+
+{% if mysql_mysqld_binlog_ignore_db is defined %}binlog-ignore-db       = {{ mysql_mysqld_binlog_ignore_db }}{% else %}#ssl-cert{% endif %}
+
+{% if mysql_mysqld_chroot is defined %}chroot                 = {{ mysql_mysqld_chroot }}{% else %}#ssl-ca{% endif %}
+
+{% if mysql_mysqld_ssl_ca is defined %}ssl-ca                 = {{ mysql_mysqld_ssl_ca }}{% else %}#chroot{% endif %}
+
+{% if mysql_mysqld_ssl_cert is defined %}ssl-cert               = {{ mysql_mysqld_ssl_cert }}{% else %}#binlog_ignore_db{% endif %}
+
+{% if mysql_mysqld_ssl_key is defined %}ssl-key                = {{ mysql_mysqld_ssl_key }}{% else %}#binlog_do_db{% endif %}
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet     = {{ mysql_mysqldump_max_allowed_packet }}M
+
+[mysql]
+#no-auto-rehash# faster start of mysql but no tab completition
+
+[isamchk]
+key_buffer_size        = 16M
+
+#
+# * IMPORTANT: Additional settings that can override those from this file!
+#   The files must end with '.cnf', otherwise they'll be ignored.
+#
+!includedir /etc/mysql/conf.d/
