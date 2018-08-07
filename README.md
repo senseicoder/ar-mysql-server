@@ -1,5 +1,5 @@
-# Usage
-
+# ar-mysql-server
+## ar-mysql-server role architecture
 ```console
 ├── LICENSE
 ├── README.md
@@ -24,6 +24,7 @@
 └── vars
     └── Debian.yml
 ```
+## usage
 ```yaml
 roles:
   - { role: ar-mysql-server }
