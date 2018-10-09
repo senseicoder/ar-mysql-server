@@ -17,9 +17,6 @@
   apt: name={{ mysql_pkg }} state=present
   register: deb_mysql_install_packages
 
-- name: Install Mysql libs for PHP5
-  apt: name=php5-mysql state=present
-
 - name: Ensure Percona TK packages are installed
   apt: name=percona-toolkit state=present force=true
 
