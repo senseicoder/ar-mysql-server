@@ -37,5 +37,5 @@
   when: out.changed
 
 - name: Restart mysql when performances.cnf change
-  service: name={{ mysql_svc }} state=restarted sleep=5
+  service: name={{ mysql_svc }} state=restarted
   when: out.changed
