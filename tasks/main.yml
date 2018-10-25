@@ -37,3 +37,4 @@
 - include_tasks: configure.yml
 - include_tasks: secure-installation.yml
 - include_tasks: performances.yml
+- include_tasks: replication.yml
