@@ -6,7 +6,7 @@
     owner: mysql 
     group: mysql
   register: master_repl
-  when: mysql_master_replication
+  when: mysql_master_replication is defined
 
 - name: Template slave-replication.cnf
   template: 
@@ -15,7 +15,11 @@
     owner: mysql 
     group: mysql
   register: slave_repl
-  when: mysql_slave_replication
+  when: mysql_slave_replication is defined
+
+- name: Restart mysql when master-replication.cnf or slave-replication.cnf changed
+  service: name={{ mysql_svc }} state=restarted
+  when: master_repl.changed or slave_repl.changed
 
 - name: Ensure replication user exists on master
   mysql_user:
@@ -27,22 +31,25 @@
     login_host: localhost
     login_user: root
     login_password: "{{ mysql_root_password }}"
-  when: mysql_master_replication and mysql_root_password and mysql_master_replication_user != ''
+  when: mysql_master_replication is defined and mysql_root_password is defined and mysql_replication_user.name != ''
 
 - name: Check slave replication status
   mysql_replication: mode=getslave
   ignore_errors: True
   register: slave_repl_status
-  when: mysql_slave_replication or mysql_master_replication
+  when: mysql_slave_replication is defined or mysql_master_replication is defined
+
+- debug: { var: slave_repl_status }
 
 - name: Check master replication status
-  mysql_replication: mode=getmaster login_user=root login_password="{{ mysql_root_password }}"
-  become: false
   delegate_to: "{{ mysql_replication_master_ssh }}"
-  register: master
+  mysql_replication: mode=getmaster 
+  register: master_repl_status
   when: >
     (slave_repl_status is failed or slave_repl_status.Is_Slave == false) and
-    (mysql_slave_replication or mysql_master_replication)
+    (mysql_slave_replication is defined or mysql_master_replication is defined )
+
+- debug: { var: master_repl_status }
 
 - name: Configure replication on the slave
   mysql_replication:
@@ -50,15 +57,18 @@
     master_host: "{{ mysql_replication_master }}"
     master_user: "{{ mysql_replication_user.name }}"
     master_password: "{{ mysql_replication_user.password }}"
-    master_log_file: "{{ master.File }}"
-    master_log_pos: "{{ master.Position }}"
+    master_log_file: "{{ master_repl_status.File }}"
+    master_log_pos: "{{ master_repl_status.Position }}"
   ignore_errors: True
   when: >
     (slave_repl_status is failed or slave_repl_status.Is_Slave == false) and
-    (mysql_slave_replication or mysql_master_replication and mysql_master_replication_user != '')
+    (mysql_slave_replication is defined or mysql_master_replication is defined and mysql_replication_user.name != '')
 
 - name: Start replication
   mysql_replication: mode=startslave
+  register: start_replication
   when: >
     (slave_repl_status is failed or slave_repl_status.Is_Slave == false) and
-    (mysql_slave_replication or mysql_master_replication)
+    (mysql_slave_replication is defined or mysql_master_replication is defined)
+
+- debug: { var: start_replication }
