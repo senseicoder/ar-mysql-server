@@ -7,6 +7,7 @@
       owner: mysql 
       group: mysql
     register: master_repl
+    when: mysql_master_replication is defined
 
   - name: Template slave-replication.cnf
     template: 
@@ -15,7 +16,8 @@
       owner: mysql 
       group: mysql
     register: slave_repl
-
+    when: mysql_slave_replication is defined
+ 
   - name: Restart mysql when master-replication.cnf or slave-replication.cnf changed
     service: name={{ mysql_svc }} state=restarted
     when: master_repl.changed or slave_repl.changed
