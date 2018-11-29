@@ -1,12 +1,9 @@
 ---
-
 - name: Get OS-specific variables
   include_vars: "{{ item }}"
   with_first_found:
    - "{{ ansible_distribution }}.yml"
    - "{{ ansible_os_family }}.yml"
-
-- include: shared-vars.yml
 
 - name: Check if MySQL is already installed
   stat: path=/etc/init.d/mysql
@@ -20,11 +17,8 @@
   apt: name={{ mysql_pkg }} state=present
   register: deb_mysql_install_packages
 
-- name: Install Mysql libs for PHP5
-  apt: name=php5-mysql state=present
-
 - name: Ensure Percona TK packages are installed
-  apt: name=percona-toolkit state=present
+  apt: name=percona-toolkit state=present force=true
 
 - name: Ensure MySQL is stopped after initial install
   service: name=mysql state=stopped
@@ -33,13 +27,14 @@
 
 - name: Delete innodb log files created by apt package after initial install
   file: path={{ item }} state=absent
-  with_items : [ "{{ mysql_datadir }}/ib_logfile0", "{{ mysql_datadir }}/ib_logfile1" ]
+  with_items : [ "{{ mysql_std_datadir }}/ib_logfile0", "{{ mysql_std_datadir }}/ib_logfile1" ]
   when: mysql_installed.stat.exists == false
 
 - name: Check if MySQL packages were installed
   set_fact:
     mysql_install_packages: "{{ (deb_mysql_install_packages is defined and deb_mysql_install_packages.changed) }}"
 
-- include: configure.yml
-- include: secure-installation.yml
-- include: performances.yml
+- include_tasks: configure.yml
+- include_tasks: secure-installation.yml
+- include_tasks: performances.yml
+- include_tasks: replication.yml

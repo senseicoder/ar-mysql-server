@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+
+{% if mysql_master_replication is defined %}
+[mysqld]
+server-id                = {{ mysql_master_server_id }}
+auto_increment_offset    = {{ mysql_master_auto_increment_offset }}
+auto_increment_increment = {{ mysql_master_auto_increment_increment }}
+replicate-ignore-db      = {{ mysql_master_replicate_ignore_db }}
+binlog-ignore-db         = {{ mysql_master_binlog_ignore_db }}
+log-slave-updates
+
+log-bin                  = {{ mysql_master_replogdir }}/master-log-bin
+relay-log                = {{ mysql_master_replogdir }}/slave-log-relay
+{%else%}{%endif%}

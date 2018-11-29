@@ -1,83 +1,93 @@
 ---
+- name: Ensure all MYSQL dirs exists and has OK rights
+  file: 
+    path: "{{ item.paths }}"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: "{{ item.modes }}"
+  with_items:
+    - { paths: '{{ mysql_mysqld_tmpdir }}',  modes: '1777' }
+    - { paths: '{{ mysql_mysqld_datadir }}', modes: '0700' }
+    - { paths: '{{ mysql_logdir }}',         modes: '0755' }
+    - { paths: '{{ mysql_replogdir }}',      modes: '0755' }
 
-- set_fact:
-    mysql_config_file: /etc/mysql/my.cnf
+- stat: path="{{ mysql_mysqld_datadir }}/.stonecopy"
+  register: stone
 
-- name: suppression fichier de configuration syslog qui gêne le démarrage
-  file: path=/etc/mysql/conf.d/mysqld_safe_syslog.cnf state=absent
+- stat: path="{{ mysql_std_datadir }}"
+  register: sdata
 
-- name: renommage key_buffer pour éviter un warning
-  replace: >
-    dest={{ mysql_config_file }}
-    regexp='^key_buffer[ \t]*=[ \t]*(.*)$'
-    replace='key_buffer_size = \1'
+- name: Copy data from /var/lib/mysql to {{ mysql_mysqld_datadir }} if they differ
+  shell: cp -par /var/lib/mysql/* {{ mysql_mysqld_datadir }}/
+  when: mysql_mysqld_datadir != mysql_std_datadir and sdata.stat.exists == True and stone.stat.exists == False
+  register: copy_shell
 
-- name: renommage myisam_recover pour éviter un warning
-  replace: >
-    dest={{ mysql_config_file }}
-    regexp='^myisam_recover[ \t]*=[ \t]*(.*)$'
-    replace='myisam_recover_options = \1'
+- debug: { var: copy_shell.stdout }
 
-- name: création dossier temporaire MySQL
-  file: path="{{ mysql_tmpdir }}" state=directory owner=mysql group=mysql mode=0755
-    
-- name: Ensure Mysql dirs exists and has ok rights
-  file: path={{ item }} state=directory owner=mysql group=mysql 
-  with_items: [ "{{ mysql_datadir }}", "{{ mysql_logdir }}", "{{ mysql_replogdir }}" ]
+- name: Rename {{ mysql_std_datadir }} and {{ mysql_std_logdir }} to old
+  command: mv "{{ item.path }}" "{{ item.rename }}"
+  with_items:
+    - { path: "{{ mysql_std_datadir }}", rename: /var/lib/old_mysql_dir }
+    - { path: "{{ mysql_std_logdir }}", rename: /var/log/old_mysql_log }
+  when: sdata.stat.exists == True and stone.stat.exists == False
 
-- name: Configure datadir in global MySQL configuration
-  lineinfile: >
-    dest={{ mysql_config_file }}
-    regexp="^datadir"
-    line="datadir = {{ mysql_datadir }}"
-  when: mysql_datadir is defined
+- name: Touch a .stone file to prevent multiple copy
+  file:
+    path: "{{ mysql_mysqld_datadir }}/.stonecopy"
+    state: touch 
+  when: stone.stat.exists == False
 
-- name: le datadir par défaut est-il encore présent
-  stat: path=/var/lib/mysql
-  register: old_datadir 
-
-- name: copie des données de /var/lib/mysql vers le nouveau datadir
-  shell: cp -par /var/lib/mysql/* {{ mysql_datadir }}/
-  when: old_datadir.stat.exists == True
-
-- name: reconfiguration apparmor pour prendre en compte les nouveaux dossiers Mysql
-  shell: sed -i {{ item }} -e 's#/var/lib/mysql#{{ mysql_datadir }}#g' -e 's#/var/log/mysql#{{ mysql_logdir }}#g'
+- name: Reconfigure Apparmor to use new {{ mysql_mysqld_datadir }} and {{ mysql_logdir }} if they differ from standard
+  shell: sed -i {{ item }} -e 's#/var/lib/mysql#{{ mysql_mysqld_datadir }}#g' -e 's#/var/log/mysql#{{ mysql_logdir }}#g'
   register: sedchangeconf
   changed_when: sedchangeconf.stdout != ""
   with_items: 
     - /etc/apparmor.d/usr.sbin.mysqld
   args:
     warn: false
+  when: mysql_mysqld_datadir != mysql_std_datadir and mysql_logdir != mysql_std_logdir
 
-- name: logrotate configuration
-  template: src=templates/logrotate.j2 dest=/etc/logrotate.d/mysql-server mode=0644 owner=root group=root
-
-- name: suppression standard dirs
-  file: path={{ item }} state=absent
-  with_items: 
-    - /var/lib/mysql
-    - /var/log/mysql
-
-- name: fichier template configuration
-  set_fact: 
-    templateconf: "configuration.cnf.j2"
+- name: Logrotate configuration
+  template:
+    src: templates/logrotate.j2 
+    dest: /etc/logrotate.d/mysql-server
+    mode: 0644 
+    owner: root 
+    group: root
   
-- name: Install cnf override into include directory
-  template: src="{{ templateconf }}"
-            dest="{{ mysql_cfg_incdir }}/configuration.cnf"
-            owner=0 group=mysql mode=0640
+- name: Template my.cnf
+  template:
+    src: my.cnf.j2
+    dest: "/etc/mysql/my.cnf"
+    owner: 0
+    group: mysql 
+    mode: 0640
+  register: cnf
 
-- name: création fichier de log pour débloquer lancement mysql
-  file: path=/space/logmysql/mysql-error.log state=touch owner=mysql group=mysql
+- stat: path="{{ mysql_logdir }}/mysql-error.log"
+  register: err_log
 
-#sécurité, pour éviter qu'un process reste en activité et lock l'accès au dossier (rencontré lors du déploiement en preprod, avril 2016)
-- name: kill mysqld
-  shell: killall {{ item }}
+- name: Create {{ mysql_logdir }}/mysql-error.log - needed to start MySQL
+  file:
+    path: "{{ mysql_logdir }}/mysql-error.log"
+    state: touch
+    owner: mysql
+    group: mysql
+    mode: 0640
+  when: err_log.stat.exists == False
+
+- name: Kill MYSQLd
+  shell: killall "{{ item }}"
   with_items : [ mysqld, mysqld_safe ]
   failed_when: false
   changed_when: false
-  when: mysql_install_packages
+  when: cnf.changed
 
 - name: Ensure MySQL is started and not enabled on boot
   service: name={{ mysql_svc }} state=started enabled=no
   changed_when: false
+
+- name: Restart MySQL
+  service: name={{ mysql_svc }} state=restarted
+  when: cnf.changed

@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+
+{% if mysql_slave_replication is defined %}
+[mysqld]
+server-id          = {{ mysql_slave_server_id }}
+read-only          = {{ mysql_slave_read_only }}
+tmpdir             = {{ mysql_slave_tmpdir }}
+datadir            = {{ mysql_slave_datadir }}
+log-error          = {{ mysql_slave_logdir }}/mysql-error.log
+relay-log          = {{ mysql_slave_replogdir }}/slave-log-relay
+skip-name-resolve
+{%else%}{%endif%}
