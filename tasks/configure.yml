@@ -25,12 +25,13 @@
   file: path={{ item }} state=directory owner=mysql group=mysql 
   with_items: [ "{{ mysql_datadir }}", "{{ mysql_logdir }}", "{{ mysql_replogdir }}" ]
 
-- name: Configure datadir in global MySQL configuration
-  lineinfile: >
-    dest={{ mysql_config_file }}
-    regexp="^datadir"
-    line="datadir = {{ mysql_datadir }}"
-  when: mysql_datadir is defined
+#obsolète?, et plante mariadb sur debian 9
+#- name: Configure datadir in global MySQL configuration
+#  lineinfile: >
+#    dest={{ mysql_config_file }}
+#    regexp="^datadir"
+#    line="datadir = {{ mysql_datadir }}"
+#  when: mysql_datadir is defined
 
 - name: le datadir par défaut est-il encore présent
   stat: path=/var/lib/mysql
