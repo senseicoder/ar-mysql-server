@@ -27,7 +27,7 @@
 
 - name: Install Mysql libs for PHP5
   apt: name=php5-mysql state=present
-  when: "{{ php_major_version }} == 5" 
+  when: php_major_version == 5
 #fin TODO
 
 - name: Ensure Percona TK packages are installed
