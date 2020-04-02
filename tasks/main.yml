@@ -20,7 +20,6 @@
   apt: name={{ mysql_pkg }} state=present
   register: deb_mysql_install_packages
 
-#TODO à tester!!
 - name: version de PHP
   shell: php -r 'echo PHP_MAJOR_VERSION;'
   register: php_major_version
@@ -28,7 +27,6 @@
 - name: Install Mysql libs for PHP5
   apt: name=php5-mysql state=present
   when: php_major_version == 5
-#fin TODO
 
 - name: Ensure Percona TK packages are installed
   apt: name=percona-toolkit state=present

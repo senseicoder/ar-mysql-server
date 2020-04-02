@@ -3,6 +3,11 @@
 - set_fact:
     mysql_config_file: /etc/mysql/my.cnf
 
+- name: droits sur fichier de conf
+  file: 
+    path: "{{ mysql_config_file }}"
+    mode: 0644
+
 - name: suppression fichier de configuration syslog qui gêne le démarrage
   file: path=/etc/mysql/conf.d/mysqld_safe_syslog.cnf state=absent
 

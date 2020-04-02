@@ -1,9 +1,16 @@
 ---
 
+- set_fact:
+    engine: "{{ mysql_server_std[ansible_hostname].mysql_engine }}"
+    mysql_server_memory: "{{ mysql_server_std[ansible_hostname].mysql_server_memory | int | abs }}"
+
+- debug: var=engine
+- debug: var=mysql_server_memory
+
 - name: cas serveur myisam
   set_fact:
     mysql_engine: "myisam"
-    mysql_myisam_buffer: "{{ (mysql_server_memory / 2 - 2048) | int | abs }}"
+    mysql_myisam_buffer: "{{ (mysql_server_memory | int / 2 - 2048) | int | abs }}"
     mysql_innodb_buffer: 8
     mysql_innodb_redo_size: 32
   when: engine == "myisam"
@@ -12,15 +19,15 @@
   set_fact:
     mysql_engine: "innodb"
     mysql_myisam_buffer: 32
-    mysql_innodb_buffer: "{{ (mysql_server_memory - 2048) | int | abs }}"
+    mysql_innodb_buffer: "{{ (mysql_server_memory | int - 2048) | int | abs }}"
     mysql_innodb_redo_size: 256
   when: engine == "innodb"
 
 - name: cas serveur mixte
   set_fact:
     mysql_engine: "innodb"
-    mysql_myisam_buffer: "{{ (mysql_server_memory / 4 - 2048) | int | abs }}"
-    mysql_innodb_buffer: "{{ (mysql_server_memory / 4) | int | abs }}"
+    mysql_myisam_buffer: "{{ (mysql_server_memory | int / 4 - 2048) | int | abs }}"
+    mysql_innodb_buffer: "{{ (mysql_server_memory | int / 4) | int | abs }}"
     mysql_innodb_redo_size: 256
   when: engine == "mixte"
 
