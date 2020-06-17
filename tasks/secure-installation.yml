@@ -16,8 +16,9 @@
   register: mysql_root_hosts
   changed_when: false
 
+#ne marche plus avec Mysql 5.7
 - name: See if password already set
-  command: mysql {{ use_debian }} -NBe 'SELECT password FROM mysql.user WHERE user = "root" and Host = "localhost"'
+  command: mysql {{ use_debian }} -NBe 'SELECT authentication_string FROM mysql.user WHERE user = "root" and Host = "localhost"'
   register: mysql_root_password_select
   changed_when: false
 

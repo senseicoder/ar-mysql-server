@@ -46,14 +46,19 @@
   shell: cp -par /var/lib/mysql/* {{ mysql_datadir }}/
   when: old_datadir.stat.exists == True
 
-- name: reconfiguration apparmor pour prendre en compte les nouveaux dossiers Mysql
-  shell: sed -i {{ item }} -e 's#/var/lib/mysql#{{ mysql_datadir }}#g' -e 's#/var/log/mysql#{{ mysql_logdir }}#g'
+- stat:
+    path: /etc/apparmor.d/
+  register: apparmor_installed
+
+- name: Reconfigure Apparmor to use new {{ mysql_mysqld_datadir }} and {{ mysql_logdir }} if they differ from standard
+  shell: sed -i {{ item }} -e 's#/var/lib/mysql#{{ mysql_mysqld_datadir }}#g' -e 's#/var/log/mysql#{{ mysql_logdir }}#g'
   register: sedchangeconf
   changed_when: sedchangeconf.stdout != ""
   with_items: 
     - /etc/apparmor.d/usr.sbin.mysqld
   args:
     warn: false
+  when: apparmor_installed.stat.isdir is defined and apparmor_installed.stat.isdir and mysql_mysqld_datadir != mysql_std_datadir and mysql_logdir != mysql_std_logdir
 
 - name: logrotate configuration
   template: src=templates/logrotate.j2 dest=/etc/logrotate.d/mysql-server mode=0644 owner=root group=root
@@ -72,6 +77,12 @@
   template: src="{{ templateconf }}"
             dest="{{ mysql_cfg_incdir }}/configuration.cnf"
             owner=0 group=mysql mode=0640
+
+- name: Install cnf override for binlog into include directory
+  template: src="binlog.cnf.j2"
+            dest="{{ mysql_cfg_incdir }}/binlog.cnf"
+            owner=0 group=mysql mode=0640
+  when: mysql_binlog is defined and mysql_binlog
 
 - name: création fichier de log pour débloquer lancement mysql
   file: path=/space/logmysql/mysql-error.log state=touch owner=mysql group=mysql
