@@ -1,4 +1,7 @@
 ---
+## mysql standard dirs
+mysql_std_datadir: /var/lib/mysql
+mysql_std_logdir: /var/log/mysql
 
 mysql_cfg: "{{ osvar_cfg }}"
 mysql_pkg: "{{ osvar_pkg }}"
