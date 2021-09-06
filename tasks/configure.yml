@@ -47,7 +47,7 @@
   when: old_datadir.stat.exists == True
 
 - stat:
-    path: /etc/apparmor.d/
+    path: '/etc/apparmor.d/usr.sbin.mysqld'
   register: apparmor_installed
 
 - name: "Reconfigure Apparmor to use new {{ mysql_mysqld_datadir }} and {{ mysql_logdir }} if they differ from standard"
@@ -58,7 +58,7 @@
     - "/etc/apparmor.d/usr.sbin.mysqld"
   args:
     warn: false
-  when: apparmor_installed.stat.isdir is defined and apparmor_installed.stat.isdir and mysql_mysqld_datadir != mysql_std_datadir and mysql_logdir != mysql_std_logdir
+  when: apparmor_installed.stat.isfile is defined and apparmor_installed.stat.isfile and mysql_mysqld_datadir != mysql_std_datadir and mysql_logdir != mysql_std_logdir
 
 - name: logrotate configuration
   template: src=templates/logrotate.j2 dest=/etc/logrotate.d/mysql-server mode=0644 owner=root group=root
