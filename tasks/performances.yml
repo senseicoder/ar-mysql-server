@@ -1,8 +1,8 @@
 ---
 
 - set_fact:
-    engine: "{{ mysql_server_std[ansible_hostname].mysql_engine }}"
-    mysql_server_memory: "{{ mysql_server_std[ansible_hostname].mysql_server_memory | int | abs }}"
+    engine: "{{ mysql_server_std[inventory_hostname].mysql_engine }}"
+    mysql_server_memory: "{{ mysql_server_std[inventory_hostname].mysql_server_memory | int | abs }}"
 
 - debug: var=engine
 - debug: var=mysql_server_memory
